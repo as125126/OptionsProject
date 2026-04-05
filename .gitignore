@@ -1,0 +1,35 @@
+# === 1. 敏感與金鑰管理 ===
+# 這是最核心的防線，絕對不能進版控
+config/.env
+config/*.json
+!config/settings.json.template
+*.pem
+*.key
+
+# === 2. Python 虛擬環境與編譯檔 ===
+# .venv 是你本機的環境，別人的電腦要自己建
+.venv/
+env/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# === 3. 專案執行日誌與暫存 ===
+# logs 資料夾只留目錄結構，不留紀錄檔
+logs/*.log
+*.log
+
+# === 4. 打包與發佈 (如果未來需要產出 EXE) ===
+build/
+dist/
+*.spec
+
+# === 5. VS Code 專屬設定 ===
+.vscode/
+!.vscode/settings.json.template
+
+# === 6. 作業系統暫存檔 ===
+Thumbs.db
+desktop.ini
+.DS_Store
