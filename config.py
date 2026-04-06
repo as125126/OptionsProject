@@ -1,7 +1,7 @@
 import json
 import os
 
-# 定義路徑，確保不論在哪執行都能找到 config/settings.json
+# 取得目前檔案所在目錄的絕對路徑
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SETTINGS_FILE = os.path.join(BASE_DIR, 'config', 'settings.json')
 
@@ -17,14 +17,10 @@ class Config:
             return json.load(f)
 
     def get_db_config(self):
-        """根據 ENV 自動回傳 LOCAL 或 AZURE 的連線設定"""
+        """根據 ENV 自動回傳 LOCAL 或 AZURE 的設定段落"""
         return self.data["DATABASE"].get(self.env)
 
-    def get_scraper_config(self):
-        """取得爬蟲相關設定"""
-        return self.data.get("SCRAPER_CONFIG")
-
-# 建立單一實例 (Singleton 概念)，讓其他檔案直接 import
+# 建立單一實例供全域使用
 cfg = Config()
 
 if __name__ == "__main__":

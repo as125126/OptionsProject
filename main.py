@@ -1,10 +1,10 @@
-from database import AzureSQLDatabase
+from database import DatabaseManager
 
 def start_app():
     print("--- 選擇權 & 航運股自動化系統 啟動 ---")
     
     # 1. 初始化資料庫
-    db = AzureSQLDatabase()
+    db = DatabaseManager()
     
     # 2. 測試連線
     if db.test_connection():
