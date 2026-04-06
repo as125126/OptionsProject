@@ -25,11 +25,7 @@ build/
 dist/
 *.spec
 
-# === 5. VS Code 專屬設定 ===
-.vscode/
-!.vscode/settings.json.template
-
-# === 6. 作業系統暫存檔 ===
+# === 5. 作業系統暫存檔 ===
 Thumbs.db
 desktop.ini
 .DS_Store

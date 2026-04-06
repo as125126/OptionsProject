@@ -19,12 +19,17 @@ class Config:
     def get_db_config(self):
         """根據 ENV 自動回傳 LOCAL 或 AZURE 的設定段落"""
         return self.data["DATABASE"].get(self.env)
+    def get_scraper_config(self):
+        return self.data.get("SCRAPER_CONFIG")
 
 # 建立單一實例供全域使用
 cfg = Config()
 
 if __name__ == "__main__":
     # 快速測試是否讀取正確
-    db_info = cfg.get_db_config()
+    db_info = cfg.get_db_config()    
     print(f"目前環境: {cfg.env}")
     print(f"目標資料庫: {db_info['DATABASE']}")
+    scraper_info = cfg.get_scraper_config() 
+    print(f"期交所選擇權資料 URL: {scraper_info['TAIFEX_OPEN_DATA_URL']}")
+    
