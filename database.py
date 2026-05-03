@@ -138,10 +138,10 @@ class DatabaseManager:
               ,[買方增減]
               ,[賣方增減]
               ,[淨額變動]
-        FROM [OptionsTest].[dbo].[v_MajorInstitutionalOptionsAnalysis]
+        FROM [dbo].[v_MajorInstitutionalOptionsAnalysis]
         WHERE [Date] = (
             SELECT MAX([Date]) 
-            FROM [OptionsTest].[dbo].[v_MajorInstitutionalOptionsAnalysis]
+            FROM [dbo].[v_MajorInstitutionalOptionsAnalysis]
         )
         ORDER BY [Item], [CallPut];
         """

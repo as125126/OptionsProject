@@ -75,8 +75,8 @@ class InstitutionalOptionsScraper:
         data = self.fetch_data()
 
         if data is not None and not data.empty:
-            print("\n----- 資料預覽 -----")
-            print(data.head(6))  # 先印出前幾行給你看
+            # print("\n----- 資料預覽 -----")
+            # print(data.head(6))  # 先印出前幾行給你看
             # for row_idx, row in data.iterrows():
             #     print(f"\n----- 第 {row_idx} 筆 -----")
             #     print("日期:", row["日期"])
