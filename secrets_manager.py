@@ -15,11 +15,32 @@ class SecretsManager:
         if not password:
             print("⚠️ 警告：找不到資料庫密碼，請檢查 config/.env 檔案")
         return password
+    
+    def get_email_secrets(self):
+        """
+        從環境變數或安全空間獲取 Email 機密資訊
+        """
+        # 這裡可以加入額外的邏輯，例如從 AWS Secrets Manager 抓取
+        secrets = {
+            "user": os.getenv("SENDER_EMAIL"),
+            "password": os.getenv("SENDER_PASSWORD"),
+            "host": os.getenv("SMTP_SERVER", "smtp.gmail.com"),
+            "port": int(os.getenv("SMTP_PORT", 587))
+        }
 
-# 建立實例
+        # 安全檢查
+        if not secrets["user"] or not secrets["password"]:
+            raise ValueError("錯誤：找不到 Email 帳號或密碼，請檢查環境變數設定。")
+
+        return secrets
+    
 secrets_manager = SecretsManager()
 
-if __name__ == "__main__":
+# 建立實例
+if __name__ == "__main__":    
     pwd = secrets_manager.get_db_password()
     if pwd:
         print(f"成功讀取密碼，長度為: {len(pwd)}")
+    pwd = secrets_manager.get_email_secrets()
+    if pwd:
+        print(f"成功讀取 Email 機密資訊，使用者: {pwd['user']}, SMTP 伺服器: {pwd['host']}:{pwd['port']}")
