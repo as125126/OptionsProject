@@ -1,3 +1,5 @@
+from venv import logger
+
 import pyodbc
 import pandas as pd
 from config import cfg
@@ -47,7 +49,7 @@ class DatabaseManager:
             print(f"❌ 資料庫連線失敗: {e}")
             return None
 
-    # 三大法人-選擇權買賣權分計-依日期
+    # 三大法人-選擇權買賣權分計-依日期 Insert
     def insert_major_institutional_options(self, df):
         """
         將 API 抓取的資料映射到 MajorInstitutionalTradersOptions 表格中
@@ -116,6 +118,56 @@ class DatabaseManager:
         finally:
             conn.close()
 
+    def fetch_latest_options_data(self):
+        """
+        從資料庫 View 中撈取「最新一個交易日」的三大法人期權籌碼資料。
+        預期會撈出 6 筆紀錄 (外資、投信、自營商 各有 CALL 與 PUT)。
+
+        :param engine: SQLAlchemy engine 或 pyodbc connection 物件
+        :return: 包含查詢結果的 Pandas DataFrame
+        """
+
+        sql_query = """
+        SELECT 
+               [Date]
+              ,[Item]
+              ,[CallPut]
+              ,[買方]
+              ,[賣方]
+              ,[淨額]
+              ,[買方增減]
+              ,[賣方增減]
+              ,[淨額變動]
+        FROM [OptionsTest].[dbo].[v_MajorInstitutionalOptionsAnalysis]
+        WHERE [Date] = (
+            SELECT MAX([Date]) 
+            FROM [OptionsTest].[dbo].[v_MajorInstitutionalOptionsAnalysis]
+        )
+        ORDER BY [Item], [CallPut];
+        """
+        conn = self.get_connection()
+        if not conn:
+            return False
+        
+        try:
+            print("開始從資料庫撈取最新期權籌碼資料...")     
+
+            df = pd.read_sql(sql_query, conn)
+            
+            if df.empty:
+                print("⚠️ 警告：資料庫中沒有撈到任何資料。")
+            else:
+                # 取得撈到的日期印出來確認
+                report_date = df['Date'].iloc[0]
+                print(f"✅ 成功撈取 {report_date} 的籌碼資料，共 {len(df)} 筆。")
+
+            return df
+
+        except Exception as e:
+            print(f"❌ 資料庫撈取失敗: {str(e)}")
+            # 發生錯誤時回傳空的 DataFrame，避免後續程式直接崩潰
+            return pd.DataFrame()
+
     def test_connection(self):
         """測試連線是否正常"""
         conn = self.get_connection()
@@ -125,7 +177,11 @@ class DatabaseManager:
             return True
         return False
 
-
 if __name__ == "__main__":
     db = DatabaseManager()
     db.test_connection()
+    # 測試撈取資料
+    df = db.fetch_latest_options_data()
+    if not df.empty:
+        print(df.head(6))
+
