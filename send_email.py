@@ -1,15 +1,16 @@
-# send_email.py
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import logging
+import pandas as pd
+
+# 匯入我們自己寫的模組
 from secrets_manager import secrets_manager
+from database import DatabaseManager
+from report_generator import generate_options_html
 
-logger = logging.getLogger(__name__)
-
-def send_html_email(recipient_email, subject, html_content):
+def send_html_email(subject, html_content):
     """
-    透過 secrets_manager 取得金鑰並寄信
+    核心寄信功能：只負責把準備好的 HTML 寄出去[cite: 6]
     """
     try:
         # 向 secrets_manager 要機密資訊
@@ -17,24 +18,61 @@ def send_html_email(recipient_email, subject, html_content):
         
         msg = MIMEMultipart()
         msg['From'] = creds["user"]
-        msg['To'] = recipient_email
+        msg['To'] = creds["user"]   
         msg['Subject'] = subject
         msg.attach(MIMEText(html_content, 'html', 'utf-8'))
 
+        print(f"正在連線至 SMTP 伺服器寄信給 {creds['user']} ...")
         with smtplib.SMTP(creds["host"], creds["port"]) as server:
             server.starttls()
             server.login(creds["user"], creds["password"])
             server.send_message(msg)
             
-        logger.info(f"郵件發送成功: {subject}")
+        print(f"✅ 郵件發送成功: {subject}")
         return True
     except Exception as e:
-        logger.error(f"郵件發送過程出錯: {str(e)}")
+        print(f"❌ 郵件發送過程出錯: {str(e)}")
         return False
 
+def send_daily_options_report():
+    """
+    封裝好的自動化流程：撈資料 -> 產報表 -> 寄信[cite: 6]
+    """
+    print("開始準備每日期權籌碼報表...")
+    
+    # 1. 撈取資料
+    db = DatabaseManager()
+    df = db.fetch_latest_options_data()
+    
+    if df is None or df.empty:
+        print("⚠️ 今日資料庫無資料，取消寄信作業。")
+        return False
+        
+    # 2. 取得日期以設定信件主旨
+    raw_date = df['Date'].iloc[0]
+    if isinstance(raw_date, str):
+        report_date = pd.to_datetime(raw_date).strftime('%Y/%m/%d')
+    else:
+        report_date = raw_date.strftime('%Y/%m/%d')
+        
+    subject = f"📊 三大法人未平倉 - {report_date}"
+    
+    # 3. 產生 HTML 內容
+    print("正在生成 HTML 報表...")
+    html_content = generate_options_html(df)
+    
+    # 4. 寄出信件
+    return send_html_email(subject, html_content)
+
+# ==========================================
+# 測試區塊 (直接執行 send_email.py 時才會跑)
+# ==========================================
 if __name__ == "__main__":
-    # 測試 logic
-    print("測試 secrets_manager 整合...")
-    # 寄測試信給自己
-    my_creds = secrets_manager.get_email_secrets()
-    send_html_email(my_creds["user"], "Secrets Manager Test", "<h1>連線成功</h1>")
+    # # 測試 logic
+    # print("測試 secrets_manager 整合...")
+    # # 寄測試信給自己
+    # my_creds = get_email_secrets()
+    # send_html_email("Secrets Manager Test", "<h1>連線成功</h1>")
+    # 測試從資料庫撈資料並產生報表
+    print("--- 執行寄信整合測試 ---")
+    send_daily_options_report()

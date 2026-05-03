@@ -5,7 +5,7 @@ OptionsProject/
 ├── secrets_manager.py     # 金鑰管理員：負責從 .env 或環境變數安全抓取敏感密碼
 ├── config.py              # 設定載入器：負責讀取並解析 config/*.json 中的環境設定
 ├── logger.py              # 日誌記錄：負責記錄系統執行狀態、成功訊息與 Error Log
-├── utils.py               # 工具包：封裝重複使用的邏輯（如：日期格式轉換、字串處理）
+├── report_generator.py    # 生產器：Email格式處理
 ├── send_email.py          # 通知模組：當執行完畢或發生異常時，自動寄送郵件回報
 │
 ├── scrapers/              # 爬蟲模組資料夾
