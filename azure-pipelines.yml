@@ -40,6 +40,11 @@ steps:
     sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17 unixodbc-dev
   displayName: '安裝 Microsoft ODBC Driver 17 for SQL Server'
 
+# 檢測連線
+- script: |
+    nc -zv as125126-sql-server.database.windows.net 1433
+  displayName: '診斷網路：測試 1433 Port 是否通暢'
+
 # 步驟 C: 安裝 Python 必要套件
 - script: |
     python -m pip install --upgrade pip
