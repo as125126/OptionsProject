@@ -7,19 +7,19 @@ schedules:
   branches:
     include:
     - main
-  always: true # 即使代碼沒更新，時間到也會準時執行
+  always: true 
 
 # ========================================================
 # 2. 代碼變動觸發設定 (Push Trigger)
 # ========================================================
 trigger:
-- main # 當你 Push 代碼到 main 分支時，也會立刻跑一次測試
+- main 
 
 # ========================================================
 # 3. 執行環境設定
 # ========================================================
 pool:
-  vmImage: 'ubuntu-latest' # 使用微軟提供的免費 Linux 虛擬機
+  vmImage: 'ubuntu-latest' 
 
 # ========================================================
 # 4. 執行步驟
@@ -31,19 +31,27 @@ steps:
     versionSpec: '3.10' 
   displayName: '設定 Python 3.10 環境'
 
-# 步驟 B: 安裝必要套件
+# 步驟 B: 安裝 Linux 系統級別的 ODBC 驅動程式 (解決你的報錯關鍵)
+- script: |
+    sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+    sudo curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > ./mssql-release.list
+    sudo mv ./mssql-release.list /etc/apt/sources.list.d/
+    sudo apt-get update
+    sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17 unixodbc-dev
+  displayName: '安裝 Microsoft ODBC Driver 17 for SQL Server'
+
+# 步驟 C: 安裝 Python 必要套件
 - script: |
     python -m pip install --upgrade pip
     pip install -r requirements.txt
-  displayName: '安裝必要套件 (pandas, requests, pymssql...)'
+  displayName: '安裝 Python 必要套件 (pandas, pyodbc...)'
 
-# 步驟 C: 執行主程式
+# 步驟 D: 執行主程式
 - script: |
     python main.py
   displayName: '執行期權爬蟲與發送報表'
   env:
-    # 這裡將 Pipeline 變數「注入」為環境變數供 Python 讀取
-    # 請確保你在 Variables 後台已經設定了這些名稱
+    # 這裡連動你 Variables 後台設定的變數名稱
     DB_PWD: $(DB_PWD)
     SMTP_SERVER: $(SMTP_SERVER)
     SMTP_PORT: $(SMTP_PORT)
