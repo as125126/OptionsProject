@@ -96,9 +96,10 @@ class InstitutionalOptionsScraper:
             #     print("未平倉口數買賣淨額:", row["未平倉口數買賣淨額"])
             #     print("未平倉契約金額買賣淨額(千元):", row["未平倉契約金額買賣淨額(千元)"])
             # 呼叫 database.py 裡面的專業寫入函式
-            self.db.insert_major_institutional_options(data)
+            return self.db.insert_major_institutional_options(data)
         else:
             print("❌ 沒有符合條件的資料可以處理。")
+            return False
 
 
 # 單獨測試區塊

@@ -2,18 +2,19 @@
 # 1. 自動排程設定 (Scheduled Trigger)
 # ========================================================
 schedules:
-- cron: "30 7 * * *" # UTC 07:30 = 台灣時間 15:30
-  displayName: "每日期權報表自動化執行"
+#- cron: "5,10,15,20,25,30 7 * * *" # UTC 07:05~07:30 = 台灣時間 15:05, 15:10, 15:15, 15:20, 15:25, 15:30
+- cron: "40 14 * * *" # UTC 07:05~07:30 = 台灣時間 15:05, 15:10, 15:15, 15:20, 15:25, 15:30
+  displayName: "每日期權報表自動化執行 (15:05~15:30 分批執行)"
   branches:
     include:
-    - main
-  always: true 
+    - master  
+  always: true
 
 # ========================================================
 # 2. 代碼變動觸發設定 (Push Trigger)
 # ========================================================
 trigger:
-- main 
+- master # 👈 已修正：當你 Push 到 master 時會立刻執行測試
 
 # ========================================================
 # 3. 執行環境設定
@@ -31,7 +32,7 @@ steps:
     versionSpec: '3.10' 
   displayName: '設定 Python 3.10 環境'
 
-# 步驟 B: 安裝 Linux 系統級別的 ODBC 驅動程式 (解決你的報錯關鍵)
+# 步驟 B: 安裝 Linux 系統級別的 ODBC 驅動程式
 - script: |
     sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
     sudo curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > ./mssql-release.list
@@ -40,26 +41,26 @@ steps:
     sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17 unixodbc-dev
   displayName: '安裝 Microsoft ODBC Driver 17 for SQL Server'
 
+# 步驟 C: 預熱資料庫 (解決冷啟動造成的 Timeout)
 - script: |
     echo "正在檢測資料庫連線..."
-    # 嘗試連線，如果失敗就等 15 秒再試一次，最多試 5 次
+    # 嘗試連線，如果失敗就等 15 秒再試一次，最多試 5 次 (共 75 秒預熱時間)
     for i in {1..5}; do
-      nc -zv as125126-sql-server.database.windows.net 1433 && break || sleep 15
+      nc -zv as125126-sql-server.database.windows.net 1433 && echo "連線成功！" && break || (echo "資料庫喚醒中，等待 15 秒..." && sleep 15)
     done
   displayName: '預熱資料庫連線 (暖機)'
 
-# 步驟 C: 安裝 Python 必要套件
+# 步驟 D: 安裝 Python 必要套件
 - script: |
     python -m pip install --upgrade pip
     pip install -r requirements.txt
   displayName: '安裝 Python 必要套件 (pandas, pyodbc...)'
 
-# 步驟 D: 執行主程式
+# 步驟 E: 執行主程式
 - script: |
     python main.py
   displayName: '執行期權爬蟲與發送報表'
   env:
-    # 這裡連動你 Variables 後台設定的變數名稱
     DB_PWD: $(DB_PWD)
     SMTP_SERVER: $(SMTP_SERVER)
     SMTP_PORT: $(SMTP_PORT)
