@@ -18,11 +18,16 @@ def main():
         # 實例化你的爬蟲類別
         scraper = InstitutionalOptionsScraper()
         
-        # 執行爬取與寫入 (你已經把寫入資料庫的邏輯包在 run() 裡面了)
-        # 所以只要這行跑完，資料就會出現在資料庫裡
-        if(scraper.run()==False):
+        # 執行爬取與寫入並取得結果
+        run_result = scraper.run()
+        
+        if run_result == False:
             print("❌ 資料爬取或寫入失敗，請檢查上方錯誤訊息。")
-            sys.exit(1)
+            sys.exit(1) # 1 代表紅叉叉失敗
+            
+        elif run_result == "EXIST":
+            print("✅ [階段一] 發現今日資料已處理過。無需重複寄信，任務提前圓滿結束！")
+            sys.exit(0) # 0 代表綠勾勾成功，程式會在這裡和平終止，不會走到階段二寄信
         
         print("✅ [階段一] 爬蟲與寫入作業完成。\n")
 

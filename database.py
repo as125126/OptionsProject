@@ -1,5 +1,4 @@
 import time
-from venv import logger
 
 import pyodbc
 import pandas as pd
@@ -98,7 +97,7 @@ class DatabaseManager:
             if count > 0:
                 # 如果已經有資料，就印出提示並提早結束這個 Function
                 print(f"⏩ {target_date} 的資料已存在資料庫中 ({count} 筆)，程式終止寫入以避免重複。")
-                return False
+                return "EXIST"  # 👈 將原本的 False 改成 "EXIST"
             else:
                 print(f"🆕 準備寫入 {target_date} 的新資料...")
             
