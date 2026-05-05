@@ -63,7 +63,7 @@ class DatabaseManager:
                 time.sleep(retry_delay)
 
     # 三大法人-選擇權買賣權分計-依日期 Insert
-    def insert_major_institutional_options(self, df):
+    def insert_major_institutional_options(self, df)-> bool | str:
         """
         將 API 抓取的資料映射到 MajorInstitutionalTradersOptions 表格中。
         寫入前會先 SELECT 檢查該日資料是否已存在，若存在則略過寫入。

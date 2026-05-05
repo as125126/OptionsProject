@@ -28,8 +28,8 @@ steps:
 # 步驟 A: 設定 Python 環境
 - task: UsePythonVersion@0
   inputs:
-    versionSpec: '3.10' 
-  displayName: '設定 Python 3.10 環境'
+    versionSpec: '3.12'
+  displayName: '設定 Python 3.12 環境'
 
 # 步驟 B: 安裝 Linux 系統級別的 ODBC 驅動程式
 - script: |
