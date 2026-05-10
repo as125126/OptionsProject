@@ -246,7 +246,7 @@ class InstitutionalOptionsScraper:
 if __name__ == "__main__":
     scraper = InstitutionalOptionsScraper()
     # 直接跑 run()，它會自動抓取並寫入資料庫
-    flag = None
+    flag = "3"
     if(flag == "1"):
         scraper.run()
     elif(flag == "2"):

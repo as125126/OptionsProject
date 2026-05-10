@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 from database import DatabaseManager
 
@@ -158,9 +160,16 @@ if __name__ == "__main__":
     df = db.fetch_latest_options_data()
     
     if not df.empty:
+
+        export_dir = "export"
+        if not os.path.exists(export_dir):
+            os.makedirs(export_dir)
+
+        file_path = os.path.join(export_dir, "test_report.html")
+
         print("\n--- 產生 HTML 報表 ---")
         html_output = generate_options_html(df)
-        with open("test_report.html", "w", encoding="utf-8") as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(html_output)
         print("✅ 報表已產生！請打開 test_report.html 查看。")
     else:

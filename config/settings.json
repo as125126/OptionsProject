@@ -1,5 +1,5 @@
 {
-    "ENV": "LOCAL",
+    "ENV": "AZURE",
     "DATABASE": {
         "LOCAL": {
             "SERVER": "localhost",

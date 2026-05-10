@@ -98,8 +98,6 @@ class DatabaseManager:
                 # 如果已經有資料，就印出提示並提早結束這個 Function
                 print(f"⏩ {target_date} 的資料已存在資料庫中 ({count} 筆)，程式終止寫入以避免重複。")
                 return "EXIST"  # 👈 將原本的 False 改成 "EXIST"
-            else:
-                print(f"🆕 準備寫入 {target_date} 的新資料...")
             
             # ==========================================
             # 確認無資料後，開始執行寫入邏輯
@@ -125,7 +123,9 @@ class DatabaseManager:
                 else:
                     # 假設是 yyyy/mm/dd 格式
                     trade_date = pd.to_datetime(date_str, format="%Y/%m/%d").date()
-                    
+                
+                print(f"🆕 準備寫入 {trade_date}-{row['買賣權別']}-{row['身份別']} 的新資料...")
+
                 params = (
                     trade_date,
                     row["商品名稱"],
