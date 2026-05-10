@@ -119,9 +119,9 @@ def generate_options_html(df):
         <tbody>
             <tr>
                 <td>買權</td>
-                <td><span>{get_val('外資及陸資', 'CALL', '買方')}</span><br/>{get_diff('外資及陸資', 'CALL', '買方增減')}</td>
-                <td><span>{get_val('外資及陸資', 'CALL', '賣方')}</span><br/>{get_diff('外資及陸資', 'CALL', '賣方增減')}</td>
-                <td>{get_val('外資及陸資', 'CALL', '淨額')}</td>
+                <td><span>{get_val('外資', 'CALL', '買方')}</span><br/>{get_diff('外資', 'CALL', '買方增減')}</td>
+                <td><span>{get_val('外資', 'CALL', '賣方')}</span><br/>{get_diff('外資', 'CALL', '賣方增減')}</td>
+                <td>{get_val('外資', 'CALL', '淨額')}</td>
                 
                 <td><span>{get_val('投信', 'CALL', '買方')}</span><br/>{get_diff('投信', 'CALL', '買方增減')}</td>
                 <td><span>{get_val('投信', 'CALL', '賣方')}</span><br/>{get_diff('投信', 'CALL', '賣方增減')}</td>
@@ -133,9 +133,9 @@ def generate_options_html(df):
             </tr>
             <tr>
                 <td>賣權</td>
-                <td><span>{get_val('外資及陸資', 'PUT', '買方')}</span><br/>{get_diff('外資及陸資', 'PUT', '買方增減')}</td>
-                <td><span>{get_val('外資及陸資', 'PUT', '賣方')}</span><br/>{get_diff('外資及陸資', 'PUT', '賣方增減')}</td>
-                <td>{get_val('外資及陸資', 'PUT', '淨額')}</td>
+                <td><span>{get_val('外資', 'PUT', '買方')}</span><br/>{get_diff('外資', 'PUT', '買方增減')}</td>
+                <td><span>{get_val('外資', 'PUT', '賣方')}</span><br/>{get_diff('外資', 'PUT', '賣方增減')}</td>
+                <td>{get_val('外資', 'PUT', '淨額')}</td>
                 
                 <td><span>{get_val('投信', 'PUT', '買方')}</span><br/>{get_diff('投信', 'PUT', '買方增減')}</td>
                 <td><span>{get_val('投信', 'PUT', '賣方')}</span><br/>{get_diff('投信', 'PUT', '賣方增減')}</td>

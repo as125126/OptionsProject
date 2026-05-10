@@ -44,7 +44,7 @@ class DatabaseManager:
                 "TrustServerCertificate=no;"
             )
 
-        max_retries = 2 # 總共嘗試次數：第 1 次 + 重試 1 次
+        max_retries = 3 # 總共嘗試次數：第 1 次 + 重試 1 次
         retry_delay = 30 # 重試間隔秒數
 
         for attempt in range(1, max_retries + 1):

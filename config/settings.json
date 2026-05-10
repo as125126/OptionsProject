@@ -1,5 +1,5 @@
 {
-    "ENV": "AZURE",
+    "ENV": "LOCAL",
     "DATABASE": {
         "LOCAL": {
             "SERVER": "localhost",
@@ -17,6 +17,6 @@
     "SCRAPER_CONFIG": {
         "TAIFEX_OPEN_DATA_URL": "https://www.taifex.com.tw/data_gov/taifex_open_data.asp?data_name=MarketDataOfMajorInstitutionalTradersDetailsOfCallsAndPutsBytheDate",
         "TAIFEX_HISTORY_DATA_URL": "https://www.taifex.com.tw/cht/3/callsAndPutsDateDown",
-        "RETRY_TIMES": 3
+        "TAIFEX_WEB_DATA_URL": "https://www.taifex.com.tw/cht/3/callsAndPutsDate"
     }
 }
