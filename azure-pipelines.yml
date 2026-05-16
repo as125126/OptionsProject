@@ -2,11 +2,18 @@
 # 1. 自動排程設定 (Scheduled Trigger)
 # ========================================================
 schedules:
-- cron: "5,10,15,20,25,30 7 * * 1-5" # 👈 修改最後一個參數為 1-5 (週一至週五)
-  displayName: "每日期權報表自動化執行 (15:05~15:30 分批執行, 排除週末)"
+- cron: "58 6 * * 1-5"
+  displayName: "每日期權報表-台灣時間 14:58 執行 (UTC 06:58)"
   branches:
     include:
-    - master  
+    - master
+  always: true
+
+- cron: "5 7 * * 1-5"
+  displayName: "每日期權報表-台灣時間 15:05 執行 (UTC 07:05)"
+  branches:
+    include:
+    - master
   always: true
 
 # ========================================================
