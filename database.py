@@ -161,13 +161,10 @@ class DatabaseManager:
 
     def fetch_latest_options_data(self):
         """
-        從資料庫 View 中撈取「最新一個交易日」的三大法人期權籌碼資料。
-        預期會撈出 6 筆紀錄 (外資、投信、自營商 各有 CALL 與 PUT)。
-
-        :param engine: SQLAlchemy engine 或 pyodbc connection 物件
-        :return: 包含查詢結果的 Pandas DataFrame
+        從資料庫 View 中撈取「最近 7 個交易日」的三大法人期權籌碼資料。
         """
 
+        # 透過 DISTINCT 找出最新 7 個交易日的日期，再撈出這 7 天的所有資料
         sql_query = """
         SELECT 
                [Date]
@@ -180,11 +177,12 @@ class DatabaseManager:
               ,[賣方增減]
               ,[淨額變動]
         FROM [dbo].[v_MajorInstitutionalOptionsAnalysis]
-        WHERE [Date] = (
-            SELECT MAX([Date]) 
-            FROM [dbo].[v_MajorInstitutionalOptionsAnalysis]
+        WHERE [Date] IN (
+            SELECT TOP 7 [Date] 
+            FROM (SELECT DISTINCT [Date] FROM [dbo].[v_MajorInstitutionalOptionsAnalysis]) AS DistinctDates
+            ORDER BY [Date] DESC
         )
-        ORDER BY [Item], [CallPut];
+        ORDER BY [Date] DESC, [Item], [CallPut];
         """
         
         try:
@@ -194,16 +192,136 @@ class DatabaseManager:
             return pd.DataFrame()
         
         try:
-            print("開始從資料庫撈取最新期權籌碼資料...")     
+            print("開始從資料庫撈取近 7 日期權籌碼資料...")     
 
             df = pd.read_sql(sql_query, conn)
             
             if df.empty:
                 print("⚠️ 警告：資料庫中沒有撈到任何資料。")
             else:
-                # 取得撈到的日期印出來確認
                 report_date = df['Date'].iloc[0]
-                print(f"✅ 成功撈取 {report_date} 的籌碼資料，共 {len(df)} 筆。")
+                print(f"✅ 成功撈取最新至 {report_date} 的籌碼資料，共 {len(df)} 筆。")
+
+            return df
+        except Exception as e:
+            print(f"❌ 資料庫撈取失敗: {str(e)}")
+            return pd.DataFrame()
+        finally:
+            if 'conn' in locals():
+                conn.close()
+
+    # 將 P/C Ratio 的資料寫入資料庫中
+    def insert_put_call_ratio(self, df)-> bool | str:
+        """
+        將 P/C Ratio 的資料寫入資料庫中。
+        寫入前會先 SELECT 檢查該日資料是否已存在，若存在則略過寫入。
+        """
+        if df is None or df.empty:
+            print("⚠️ 無資料可寫入")
+            return False
+
+
+        try:
+            conn = self.get_connection()
+        except Exception as e:
+            print(f"❌ 無法取得資料庫連線，中止寫入: {e}")
+            return False
+
+        cursor = conn.cursor()
+        try:
+            # 取得資料日期，並 SELECT 檢查是否已存在
+            first_date_str = str(df["日期"].iloc[0])    
+            if len(first_date_str) == 8 and first_date_str.isdigit():
+                target_date = pd.to_datetime(first_date_str, format="%Y%m%d").date()
+            else:
+                target_date = pd.to_datetime(first_date_str, format="%Y/%m/%d").date()
+
+            check_sql = "SELECT COUNT(1) FROM [dbo].[PutCallRatio] WHERE [Date] = ?"
+            cursor.execute(check_sql, (target_date,))
+            count = cursor.fetchone()[0]
+
+            if count > 0:
+                print(f"⏩ {target_date} 的 P/C Ratio 資料已存在資料庫中 ({count} 筆)，程式終止寫入以避免重複。")
+                return "EXIST"
+
+            # 寫入邏輯
+            sql = """
+                INSERT INTO [dbo].[PutCallRatio] (
+                    [Date], 
+                    [PutVolume], [CallVolume], [PutCallVolumeRatio],
+                    [PutOI], [CallOI], [PutCallOIRatio]
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """
+
+            for _, row in df.iterrows():
+                date_str = str(row["日期"])    
+                if len(date_str) == 8 and date_str.isdigit():
+                    trade_date = pd.to_datetime(date_str, format="%Y%m%d").date()
+                else:
+                    trade_date = pd.to_datetime(date_str, format="%Y/%m/%d").date()
+                
+                print(f"🆕 準備寫入 {trade_date} 的 P/C Ratio 新資料...")
+
+                params = (
+                    trade_date,
+                    row["賣權成交量"],
+                    row["買權成交量"],
+                    row["買賣權成交量比率%"],
+                    row["賣權未平倉量"],
+                    row["買權未平倉量"],
+                    row["買賣權未平倉量比率%"]
+                )
+                cursor.execute(sql, params)
+
+            conn.commit()
+            print(f"✅ 成功寫入 {len(df)} 筆 P/C Ratio 資料至 {self.env} 資料庫")
+            return True
+        except Exception as e:
+            print(f"❌ 寫入資料庫失敗: {e}")
+            conn.rollback()
+            return False
+        
+    def fetch_put_call_ratio(self):
+        """
+        從資料庫中撈取最近 7 個交易日的 P/C Ratio 資料。
+        
+        :return: 包含查詢結果的 Pandas DataFrame (已依日期由舊到新排序)
+        """
+        # 使用 TOP 7 搭配 DESC 抓取最新 7 天的紀錄
+        sql_query = """
+        SELECT TOP 7
+               [Date]
+              ,[PutVolume]
+              ,[CallVolume]
+              ,[PutCallVolumeRatio]
+              ,[PutOI]
+              ,[CallOI]
+              ,[PutCallOIRatio]
+        FROM [dbo].[PutCallRatio]
+        ORDER BY [Date] DESC;
+        """
+        
+        try:
+            conn = self.get_connection()
+        except Exception as e:
+            print(f"❌ 無法取得資料庫連線，中止讀取: {e}")
+            return pd.DataFrame()
+        
+        try:
+            print("開始從資料庫撈取近 7 日 P/C Ratio 資料...")     
+
+            df = pd.read_sql(sql_query, conn)
+            
+            if df.empty:
+                print("⚠️ 警告：資料庫中沒有撈到任何 P/C Ratio 資料。")
+            else:
+                # 為了方便後續閱讀或繪圖，將資料反轉回「由舊到新」排序
+                df = df.sort_values(by="Date", ascending=True).reset_index(drop=True)
+                
+                # 印出撈取到的區間供確認
+                start_date = df['Date'].iloc[0]
+                end_date = df['Date'].iloc[-1]
+                print(f"✅ 成功撈取 P/C Ratio 資料，共 {len(df)} 筆。區間：{start_date} ~ {end_date}")
 
             return df
 
@@ -232,3 +350,6 @@ if __name__ == "__main__":
     df = db.fetch_latest_options_data()
     if not df.empty:
         print(df.head(6))
+    pc_df = db.fetch_put_call_ratio()
+    if not pc_df.empty:
+        print(pc_df)

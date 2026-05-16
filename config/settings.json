@@ -17,6 +17,7 @@
     "SCRAPER_CONFIG": {
         "TAIFEX_OPEN_DATA_URL": "https://www.taifex.com.tw/data_gov/taifex_open_data.asp?data_name=MarketDataOfMajorInstitutionalTradersDetailsOfCallsAndPutsBytheDate",
         "TAIFEX_HISTORY_DATA_URL": "https://www.taifex.com.tw/cht/3/callsAndPutsDateDown",
-        "TAIFEX_WEB_DATA_URL": "https://www.taifex.com.tw/cht/3/callsAndPutsDate"
+        "TAIFEX_WEB_DATA_URL": "https://www.taifex.com.tw/cht/3/callsAndPutsDate",
+        "TAIFEX_WEB_PC_RATIO_URL": "https://www.taifex.com.tw/cht/3/pcRatio"
     }
 }

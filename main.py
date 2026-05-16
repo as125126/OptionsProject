@@ -2,6 +2,7 @@ import sys
 # 1. 匯入你的爬蟲類別
 from scrapers.opt_contracts import InstitutionalOptionsScraper
 # 2. 匯入你的寄信報表模組
+from scrapers.pc_ratio import PutCallRatioOptionsScraper
 from send_email import send_daily_options_report
 
 def main():
@@ -29,6 +30,15 @@ def main():
             print("✅ [階段一] 發現今日資料已處理過。無需重複寄信，任務提前圓滿結束！")
             sys.exit(0) # 0 代表綠勾勾成功，程式會在這裡和平終止，不會走到階段二寄信
         
+        # 寫入 pc_ratio
+        scraper = PutCallRatioOptionsScraper()
+        
+        run_result = scraper.run()
+        
+        if run_result == False:
+            print("❌ 資料爬取或寫入失敗，請檢查上方錯誤訊息。")
+            sys.exit(1) # 1 代表紅叉叉失敗
+
         print("✅ [階段一] 爬蟲與寫入作業完成。\n")
 
         # ==========================================
