@@ -23,6 +23,7 @@ class SecretsManager:
         # 這裡可以加入額外的邏輯，例如從 AWS Secrets Manager 抓取
         secrets = {
             "user": os.getenv("SENDER_EMAIL"),
+            "to_emails": os.getenv("TO_EMAIL").split(";") if os.getenv("TO_EMAIL") else [],
             "password": os.getenv("SENDER_PASSWORD"),
             "host": os.getenv("SMTP_SERVER", "smtp.gmail.com"),
             "port": int(os.getenv("SMTP_PORT", 587))

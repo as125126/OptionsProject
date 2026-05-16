@@ -19,11 +19,11 @@ def send_html_email(subject, html_content):
 
         msg = MIMEMultipart()
         msg["From"] = creds["user"]
-        msg["To"] = creds["user"]
+        msg["To"] = creds["to_emails"] if isinstance(creds["to_emails"], str) else ", ".join(creds["to_emails"])
         msg["Subject"] = subject
         msg.attach(MIMEText(html_content, "html", "utf-8"))
 
-        print(f"正在連線至 SMTP 伺服器寄信給 {creds['user']} ...")
+        print(f"正在連線至 SMTP 伺服器寄信")
         with smtplib.SMTP(creds["host"], creds["port"]) as server:
             server.starttls()
             server.login(creds["user"], creds["password"])
