@@ -28,7 +28,8 @@ class DatabaseManager:
     def get_engine(self):
         """建立與資料庫的 SQLAlchemy Engine，包含失敗重試機制"""
         # SQLAlchemy URL 格式中，Driver 名稱的空格必須換成 '+'
-        formatted_driver = self.driver.replace(' ', '+')
+        # 先移除大括號（如果有的話），再將空格換成 '+'
+        formatted_driver = self.driver.strip('{}').replace(' ', '+')
 
         if self.env == "LOCAL":
             # Local Windows Auth 格式
