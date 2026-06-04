@@ -130,6 +130,7 @@ class DatabaseManager:
 
         except Exception as e:
             print(f"❌ 寫入資料庫失敗: {e}")
+            print(f"錯誤發生在以下資料列：{row.to_dict()}")
             # rollback 會交由 with 區塊與 raw_connection 處理，或可在此顯式呼叫
             return False
 

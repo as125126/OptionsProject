@@ -9,8 +9,8 @@ schedules:
     - master
   always: true
 
-- cron: "5 7 * * 1-5"
-  displayName: "每日期權報表-台灣時間 15:05 執行 (UTC 07:05)"
+- cron: "5,10 7 * * 1-5"
+  displayName: "每日期權報表-台灣時間 15:05 & 15:10 執行 (UTC 07:05/07:10)"
   branches:
     include:
     - master
